@@ -1,0 +1,131 @@
+# Importar librerias necesarias
+import os;
+import re;
+
+def mostrarNombreHerramienta():    
+    banner = """
+             (                                        
+       (    )\ )                            (        
+      )\  (()/(                            )\   (   
+    (((_)  /(_))   (   (    (     (    (  ((_) ))\  
+     )\___ (_))     )\  )\   )\ )  )\   )\  _  /((_) 
+    ((/ __||_ _|   ((_)((_) _(_/( ((_) ((_)| |(_))   
+     | (__  | |   / _|/ _ \| ' \))(_-</ _ \| |/ -_)  
+      \___||___|  \__|\___/|_||_| /__/\___/|_|\___|  
+                                    by Carlos Aguirre V1.2      
+                                                 
+    """;
+    print(banner);
+
+# Muestra las opciones disponibles del menu
+def mostrarOpcionesHerramienta():
+    print("""
+    Seleccione la accion que desea realizar\n
+    1) Crear Modelo
+    2) Crear Controlador
+    3) Crear Carpetas de vistas
+    4) Configurar Base de datos
+    5) Configurar Inicio
+    6) Salir
+    """);
+    opcionEscogida = input("Opcion (numero): ");
+    return str( opcionEscogida );
+
+# Crea un modelo con su contenido
+def crearModelo():
+    nombreModelo = raw_input("Nombre del modelo ( Ejemplo_model ): ");
+    nombreModelo.replace(" ", "");
+    nombreTabla  = raw_input("Tabla de la bd: ");
+    nombreTabla.replace(" ", "");
+    modelo = crearArchivo( os.getcwd() + "/../models/"+nombreModelo+".php" , "" );
+    modeloPlantilla = open( os.getcwd()+"/templates/Ejemplo_model.php", 'r' );
+    contenido = modeloPlantilla.read();
+    contenido = re.sub( r'{{nombre_modelo}}', nombreModelo, contenido );
+    contenido = re.sub( r'{{tabla}}', nombreTabla, contenido );
+    print( "--> Creado "+os.getcwd() + "/../models/"+nombreModelo+".php" );
+    modelo.write( contenido );
+
+# Crea la carpeta de las vistas en assets ( js, css ) y en /application/views
+def crearCarpetasVistas():
+    nombreControlador = raw_input("Nombre del controlador ( Ejemplo ):");
+    nombreControlador = nombreControlador.lower();
+    # Carpeta de en views
+    if not os.path.exists( os.getcwd()+"/../views/"+nombreControlador ):
+        os.makedirs( os.getcwd()+"/../views/"+nombreControlador );
+        print( "--> Creado "+os.getcwd()+"/../views/"+nombreControlador );
+    # Carpeta de js
+    if not os.path.exists( os.getcwd()+"/../../assets/js/"+nombreControlador ):
+        os.makedirs( os.getcwd()+"/../../assets/js/"+nombreControlador );
+        print( "--> Creado "+os.getcwd()+"/../../assets/js/"+nombreControlador );
+    # Carpeta de css
+    if not os.path.exists( os.getcwd()+"/../../assets/css/"+nombreControlador ):
+        os.makedirs( os.getcwd()+"/../../assets/css/"+nombreControlador );
+        print( "--> Creado "+os.getcwd()+"/../../assets/css/"+nombreControlador );
+
+# Crea un controllador en la carpeta controllers y su contenido
+def crearControlador():
+    nombreControlador = raw_input( "Ingrese el nombre del controlador( Ejemplo ):" );
+    nombreControlador.replace(" ", "");
+    nombreModelo = raw_input("Modelo predefinido ( Ejemplo_model ):");
+    nombreModelo.replace(" ", "");
+    controlador = crearArchivo( os.getcwd() + "/../controllers/"+nombreControlador+".php" , "" );
+    controladorPlantilla = open( os.getcwd()+"/templates/Ejemplo.php", 'r' );
+    contenido = controladorPlantilla.read();
+    contenido = re.sub( r'{{nombre_modelo}}', nombreModelo, contenido );
+    contenido = re.sub( r'{{nombre_controlador}}', nombreControlador, contenido );
+    controlador.write( contenido );
+    print( "--> Creado "+os.getcwd() + "/../controllers/"+nombreControlador+".php" );
+
+def baseDeDatos():
+    configuracion = open( os.getcwd()+"/../config/database.php", 'r' );
+    contenido = configuracion.read();
+    # Configurar el host
+    host = raw_input("Direccion del host:");
+    contenido = re.sub( r"(?<=('hostname' => ')).*(?=',)", host, contenido );
+    # Configurar usuario de DB
+    usuario = raw_input("Usuario DB:");
+    contenido = re.sub( r"(?<=('username' => ')).*(?=',)", usuario, contenido );
+    # Configurar la pass 
+    password = raw_input("Contrasena:");
+    contenido = re.sub( r"(?<=('password' => ')).*(?=',)", password, contenido );
+    # Configurar database
+    database = raw_input("Base de Datos:");
+    contenido = re.sub( r"(?<=('database' => ')).*(?=',)", database, contenido );
+
+    configuracion = open( os.getcwd()+"/../config/database.php", 'w+' );
+    configuracion.write( contenido );
+    configuracion.close();
+
+def establecerInicio():
+    rutas = open( os.getcwd()+"/../config/routes.php", 'r' );
+    contenido = rutas.read();
+    inicio = raw_input("Controlador de inicio:");
+    contenido = re.sub( r"(?<=(\$route\['default_controller'] = ')).*(?=';)", inicio, contenido );
+    rutas = open( os.getcwd()+"/../config/routes.php", 'w+' );
+    rutas.write( contenido );
+
+    
+# Intenta crear un archivo a partir de una ruta si ya existe muestra un error
+def crearArchivo( path, contenido ):
+    try:
+        open( path,'r' )
+        print('Este archivo ya existe');
+    except: 
+        return open( path, 'w' )
+
+
+#---------------------- INSTRUCCIONES PRINCIPALES --------------------------
+while True:
+    mostrarNombreHerramienta()
+    menu = {'1': crearModelo, '2':crearControlador, '3':crearCarpetasVistas,'4':baseDeDatos, '5':establecerInicio };
+    opcion = mostrarOpcionesHerramienta();
+    if( opcion == '6' ):
+        break;
+    menu[ opcion ](); 
+
+print("--Gracias--");
+
+
+
+
+
