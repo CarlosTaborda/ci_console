@@ -1,7 +1,7 @@
 # ci_console
 <pre>
 ci console is a console tool to create codeigniter's models and controllers
-you move te console folder to application folder
+you move the console folder to application folder
 application/
 ---- console/             <------ this
 ---- controllers/
